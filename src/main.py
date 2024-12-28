@@ -3,11 +3,11 @@ from utils.data_processor import TextProcessor
 from models.bigram import BigramLanguageModel
 
 # hyperparameters
-batch_size = 32
+batch_size = 256
 block_size = 8
-max_iters = 3000
-eval_interval = 300
-learning_rate = 1e-2
+max_iters = 5000
+eval_interval = 500
+learning_rate = 3e-2
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # initialize data processor
@@ -28,7 +28,7 @@ def get_batch(split):
     return x, y
 
 
-model = BigramLanguageModel(processor.vocab_size)
+model = BigramLanguageModel(processor.vocab_size).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 for iter in range(max_iters):
