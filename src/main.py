@@ -51,7 +51,7 @@ context = torch.zeros((1, 1), dtype=torch.long, device=device)
 # So we start with a seed token and predict the next token
 # Then we append the predicted token to the context and predict the next token
 # We repeat this process to generate a sequence of tokens
-for i in range(100):
+for i in range(1000):
     logits, _ = model(context)
     probs = torch.softmax(logits[0, -1], dim=-1)
     context = torch.cat([context, torch.multinomial(
