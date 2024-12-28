@@ -37,13 +37,16 @@ for iter in range(max_iters):
     if iter % eval_interval == 0:
         model.eval()
         with torch.no_grad():
-            train_loss = model(*get_batch('train'))[1].item()
-            val_loss = model(*get_batch('val'))[1].item()
-        print(f"step {iter}: train loss {
-              train_loss:.4f}, val loss {val_loss:.4f}")
+            train_x, train_y = [t.to(device) for t in get_batch('train')]
+            val_x, val_y = [t.to(device) for t in get_batch('val')]
+            train_loss = model(train_x, train_y)[1].item()
+            val_loss = model(val_x, val_y)[1].item()
+        print(f"step {iter}: train loss {train_loss:.4f}, "
+              f"val loss {val_loss:.4f}")
         model.train()
 
     xb, yb = get_batch('train')
+    xb, yb = xb.to(device), yb.to(device)
     logits, loss = model(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
