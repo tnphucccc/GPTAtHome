@@ -4,11 +4,13 @@ from models.bigram import BigramLanguageModel
 
 # hyperparameters
 batch_size = 256
-block_size = 8
+block_size = 32
 max_iters = 5000
 eval_interval = 500
-learning_rate = 3e-2
+learning_rate = 1e-3
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+torch.manual_seed(1337)
 
 # initialize data processor
 processor = TextProcessor('data/input.txt')
@@ -33,12 +35,13 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 for iter in range(max_iters):
     if iter % eval_interval == 0:
-        losses = []
-        for _ in range(eval_interval):
-            xb, yb = get_batch('val')
-            logits, loss = model(xb, yb)
-            losses.append(loss.item())
-        print(f"step {iter}: val loss {sum(losses)/len(losses):.4f}")
+        model.eval()
+        with torch.no_grad():
+            train_loss = model(*get_batch('train'))[1].item()
+            val_loss = model(*get_batch('val'))[1].item()
+        print(f"step {iter}: train loss {
+              train_loss:.4f}, val loss {val_loss:.4f}")
+        model.train()
 
     xb, yb = get_batch('train')
     logits, loss = model(xb, yb)
@@ -47,14 +50,5 @@ for iter in range(max_iters):
     optimizer.step()
 
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
-# The model is trained to predict the next token given the current token
-# So we start with a seed token and predict the next token
-# Then we append the predicted token to the context and predict the next token
-# We repeat this process to generate a sequence of tokens
-for i in range(1000):
-    logits, _ = model(context)
-    probs = torch.softmax(logits[0, -1], dim=-1)
-    context = torch.cat([context, torch.multinomial(
-        probs, num_samples=1).unsqueeze(-1)], dim=-1)
-
-print(processor.decode(context.squeeze().tolist()))
+print(processor.decode(model.generate(
+    context, max_new_tokens=500)[0].tolist()))
