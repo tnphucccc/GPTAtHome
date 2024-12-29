@@ -3,11 +3,11 @@ from utils.data_processor import TextProcessor
 from models.bigram import BigramLanguageModel
 
 # hyperparameters
-batch_size = 256
-block_size = 32
-max_iters = 5000
-eval_interval = 500
-learning_rate = 1e-3
+batch_size = 128
+block_size = 256
+max_iters = 20000
+eval_interval = 2000
+learning_rate = 3e-4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 torch.manual_seed(1337)
