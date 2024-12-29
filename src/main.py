@@ -5,8 +5,8 @@ from models.bigram import BigramLanguageModel
 # Hyperparameters
 batch_size = 128  # Number of sequences processed in parallel
 block_size = 256  # Context length for predictions
-max_iters = 20000  # Total training iterations
-eval_interval = 2000  # How often to evaluate the model
+max_iters = 15000  # Total training iterations
+eval_interval = 2500  # How often to evaluate the model
 learning_rate = 3e-4  # Optimizer learning rate
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

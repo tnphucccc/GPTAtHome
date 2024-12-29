@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class BigramLanguageModel(nn.Module):
@@ -10,17 +11,25 @@ class BigramLanguageModel(nn.Module):
 
     Attributes:
         token_embedding_table (nn.Embedding): Embedding layer that maps token IDs to vectors
+        embedding_proj (nn.Linear): Projection layer
+        layer_norm (nn.LayerNorm): Layer normalization
+        dropout (nn.Dropout): Dropout layer
     """
 
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, embed_dim=384, dropout_rate=0.1):
         """Initialize the bigram language model.
 
         Args:
             vocab_size (int): Size of the vocabulary - number of unique tokens
+            embed_dim (int): Dimension of embeddings
+            dropout_rate (float): Dropout probability
         """
 
         super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, embed_dim)
+        self.embedding_proj = nn.Linear(embed_dim, vocab_size)
+        self.layer_norm = nn.LayerNorm(embed_dim)
+        self.dropout = nn.Dropout(dropout_rate)
 
     def forward(self, idx, targets=None):
         """Forward pass of the model.
@@ -30,12 +39,14 @@ class BigramLanguageModel(nn.Module):
             targets (torch.Tensor, optional): Target tensor of next tokens, shape (batch_size, sequence_length)
 
         Returns:
-            tuple:
-                - logits (torch.Tensor): Raw model outputs, shape (batch_size, sequence_length, vocab_size)
-                - loss (torch.Tensor or None): Cross entropy loss if targets provided, else None
+            tuple: (logits, loss) if targets provided, else logits
         """
 
-        logits = self.token_embedding_table(idx)
+        B, T = idx.shape
+        token_emb = self.token_embedding_table(idx)  # [B, T, embed_dim]
+        token_emb = self.layer_norm(token_emb)
+        token_emb = self.dropout(token_emb)
+        logits = self.embedding_proj(token_emb)  # [B, T, vocab_size]
 
         if targets is None:
             loss = None
@@ -43,7 +54,7 @@ class BigramLanguageModel(nn.Module):
             B, T, C = logits.shape
             logits = logits.view(B*T, C)
             targets = targets.view(B*T)
-            loss = nn.functional.cross_entropy(logits, targets)
+            loss = F.cross_entropy(logits, targets)
 
         return logits, loss
 
@@ -73,7 +84,7 @@ class BigramLanguageModel(nn.Module):
         for _ in range(max_new_tokens):
             logits, _ = self(idx)
             logits = logits[:, -1, :]
-            probs = nn.functional.softmax(logits, dim=-1)
+            probs = F.softmax(logits, dim=-1)
             idx = torch.cat(
                 [idx, torch.multinomial(probs, num_samples=1)], dim=-1)
         return idx
