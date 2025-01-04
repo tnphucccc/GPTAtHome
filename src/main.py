@@ -75,14 +75,9 @@ for iter in range(max_iters):
     loss.backward()
     optimizer.step()
 
-# Generate text from the model
-"""
-To generate text from the model, we provide an initial context of tokens and
-autoregressively generate new tokens by sampling from the predicted probability
-distribution. The generate method takes an input context of tokens and the
-number of new tokens to generate, and returns the concatenated sequence of input
-and generated tokens.
-"""
-context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(processor.decode(model.generate(
-    context, max_new_tokens=500)[0].tolist()))
+torch.save({
+    'model_state_dict': model.state_dict(),
+    'vocab_size': processor.vocab_size,
+    'stoi': processor.stoi,
+    'itos': processor.itos
+}, 'model_checkpoint.pth')

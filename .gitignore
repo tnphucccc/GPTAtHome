@@ -76,3 +76,5 @@ profile_default/
 .vscode/
 .idea/
 __MACOSX/
+
+*.pth
