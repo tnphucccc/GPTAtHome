@@ -40,10 +40,9 @@ if __name__ == "__main__":
     try:
         model, checkpoint = load_model('model_checkpoint.pth')
 
-        print("Enter '/quit' to exit the program")
         while True:
             user_input = input(
-                "Enter context (or press Enter for random start): ")
+                "Enter '/quit' to exit the program\nEnter context (or press Enter for random start): ")
 
             if user_input.lower() == '/quit':
                 print("\nExiting program...")
