@@ -78,3 +78,5 @@ profile_default/
 __MACOSX/
 
 *.pth
+
+upload_model.py
