@@ -1,14 +1,16 @@
 import torch
 from utils.data_processor import TextProcessor
 from models.bigram import BigramLanguageModel
+from models.gpt import GPTLanguageModel
 
 # Hyperparameters
-batch_size = 128  # Number of sequences processed in parallel
+batch_size = 64  # Number of sequences processed in parallel
 block_size = 256  # Context length for predictions
-max_iters = 15000  # Total training iterations
-eval_interval = 2500  # How often to evaluate the model
+max_iters = 5000  # Total training iterations
+eval_interval = 500  # How often to evaluate the model
 learning_rate = 3e-4  # Optimizer learning rate
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'Using device: {device}')
 
 # Set random seed for reproducibility
 torch.manual_seed(1337)
@@ -42,7 +44,9 @@ def get_batch(split):
 
 
 # Initialize model and optimizer
-model = BigramLanguageModel(processor.vocab_size).to(device)
+model = GPTLanguageModel(processor.vocab_size).to(device)
+print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
+
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 # Training loop

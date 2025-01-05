@@ -1,5 +1,6 @@
 import torch
 from models.bigram import BigramLanguageModel
+from models.gpt import GPTLanguageModel
 from utils.data_processor import TextProcessor
 
 
@@ -7,7 +8,7 @@ def load_model(checkpoint_path):
     try:
         checkpoint = torch.load(checkpoint_path, weights_only=True)
 
-        model = BigramLanguageModel(checkpoint['vocab_size'])
+        model = GPTLanguageModel(checkpoint['vocab_size'])
         model.load_state_dict(checkpoint['model_state_dict'])
 
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
