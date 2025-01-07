@@ -40,25 +40,26 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-# Trainging the Model
+## Training the Model
 Train the language model on Shakespeare text:
 ```bash
 python src/train.py
 ```
 This will:
-- Load the Shakespear dataset from ```input.txt```.
+- Load the Shakespeare dataset from `input.txt`.
 - Train using the specified model architecture.
 - Save the trained model checkpoint.
 
-# Generating Text
+## Generating Text
 Generate Shakespeare-style text using the trained model:
 ```bash
 python src/generate.py
 ```
 You can give your input context or just enter for random context.
-Type ```/quit``` to exit the generation program.
+Type `/quit` to exit the generation program.
 
 ## Project Structure
+
 ```bash
 GPTAtHome/
 ├── data/
