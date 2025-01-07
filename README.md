@@ -28,7 +28,10 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 
 # Run training
-python src/main.py
+python src/train.py
+
+# Start generating
+python src/generate.py
 ```
 
 ## Project Structure
@@ -38,10 +41,12 @@ GPTAtHome/
 │   └── input.txt         # Training data (Shakespeare text)
 ├── src/
 │   ├── models/
-│   │   └── bigram.py     # BigramLanguageModel implementation
+│   │   ├── bigram.py     # BigramLanguageModel implementation
+│   │   └── gpt.py        # GPTLanguageModel implementation           
 │   ├── utils/
 │   │   └── data_processor.py
-│   └── main.py           # Training script
+│   ├── train.py          # Training script
+│   └── generate.py       # Generate script  
 └── tests/
     └── test_bigram.py    # Unit tests
 ```
