@@ -48,5 +48,6 @@ GPTAtHome/
 │   ├── train.py          # Training script
 │   └── generate.py       # Generate script  
 └── tests/
-    └── test_bigram.py    # Unit tests
+    ├── test_bigram.py    # Unit tests
+    └── test_gpt.py
 ```
