@@ -3,7 +3,15 @@
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/pytorch-2.0+-orange.svg)](https://pytorch.org/)
 
-A character-level language model implementation using PyTorch. Generates Shakespeare-style text using a bigram model architecture.
+A character-level language model implementation using PyTorch. Generates Shakespeare-style text using bigram and gpt model architecture.
+
+## Features
+
+- Character-level language modeling
+- Two model architectures: Bigram and GPT
+- Shakespeare text generation
+- Interactive text generation interface
+- CUDA support for GPU acceleration
 
 ## Requirements
 
@@ -13,26 +21,42 @@ A character-level language model implementation using PyTorch. Generates Shakesp
 
 ## Installation
 
+1. Clone the repository:
 ```bash
-# Clone the repository
 git clone https://github.com/tnphucccc/GPTAtHome.git
 cd GPTAtHome
+```
 
-# Create virtual environment
+2. Create and activate virtual environment
+```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # or
 .\venv\Scripts\activate  # Windows
+```
 
-# Install dependencies
+3. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# Run training
+# Trainging the Model
+Train the language model on Shakespeare text:
+```bash
 python src/train.py
+```
+This will:
+- Load the Shakespear dataset from ```input.txt```.
+- Train using the specified model architecture.
+- Save the trained model checkpoint.
 
-# Start generating
+# Generating Text
+Generate Shakespeare-style text using the trained model:
+```bash
 python src/generate.py
 ```
+You can give you input context or just enter for random context.
+Type ```/quit``` to exit the generation program.
 
 ## Project Structure
 ```bash
