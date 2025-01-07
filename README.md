@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/pytorch-2.0+-orange.svg)](https://pytorch.org/)
 
-A character-level language model implementation using PyTorch. Generates Shakespeare-style text using bigram and gpt model architecture.
+A character-level language model implementation using PyTorch. Generates Shakespeare-style text using Bigram and GPT model architecture.
 
 ## Features
 
