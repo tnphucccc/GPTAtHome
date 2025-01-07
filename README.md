@@ -55,7 +55,7 @@ Generate Shakespeare-style text using the trained model:
 ```bash
 python src/generate.py
 ```
-You can give you input context or just enter for random context.
+You can give your input context or just enter for random context.
 Type ```/quit``` to exit the generation program.
 
 ## Project Structure
