@@ -1,87 +1,113 @@
+from dataclasses import dataclass
+from pathlib import Path
 import torch
+import logging
+from typing import Optional
 from utils.data_processor import TextProcessor
-from models.bigram import BigramLanguageModel
 from models.gpt import GPTLanguageModel
 
-# Hyperparameters
-batch_size = 64  # Number of sequences processed in parallel
-block_size = 256  # Context length for predictions
-max_iters = 5000  # Total training iterations
-eval_interval = 500  # How often to evaluate the model
-learning_rate = 3e-4  # Optimizer learning rate
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f'Using device: {device}')
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Constants
+DATA_PATH = Path('data/input.txt')
+MODEL_PATH = Path('checkpoints/model.pth')
 
 # Set random seed for reproducibility
 torch.manual_seed(1337)
 
-# Initialize data processor
-processor = TextProcessor('data/input.txt')
-data = torch.tensor(processor.encode(processor.text), dtype=torch.long)
 
-# Split data into training and validation sets
-n = int(0.9*len(data))
-train_data = data[:n]
-val_data = data[n:]
-
-# Function to get a batch of data
+@dataclass
+class TrainConfig:
+    batch_size: int = 64
+    block_size: int = 256
+    max_iters: int = 5000
+    eval_interval: int = 500
+    learning_rate: float = 3e-4
 
 
-def get_batch(split):
-    """Get a batch of data from the training or validation set.
+class Trainer:
+    def __init__(self, config: TrainConfig, processor: Optional[TextProcessor] = None):
+        self.config = config
+        self.processor = processor
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu')
+        self.best_val_loss = float('inf')
 
-    Args:
-        split (str): 'train' or 'val' to select the dataset
+    def setup_data(self) -> tuple[torch.Tensor, torch.Tensor, int]:
+        """Load and process training data"""
+        data = torch.tensor(self.processor.encode(
+            self.processor.text), dtype=torch.long)
+        n = int(0.9 * len(data))
+        return data[:n], data[n:], self.processor.vocab_size
 
-    Returns:
-        tuple: Input and target tensors of shape (batch_size, block_size)
-    """
-    data = train_data if split == 'train' else val_data
-    ix = torch.randint(len(data) - block_size, (batch_size,))
-    x = torch.stack([data[i:i+block_size] for i in ix])
-    y = torch.stack([data[i+1:i+block_size+1] for i in ix])
-    return x, y
+    def get_batch(self, split: str, train_data: torch.Tensor,
+                  val_data: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        data = train_data if split == 'train' else val_data
+        ix = torch.randint(len(data) - self.config.block_size,
+                           (self.config.batch_size,))
+        x = torch.stack([data[i:i+self.config.block_size] for i in ix])
+        y = torch.stack([data[i+1:i+self.config.block_size+1] for i in ix])
+        return x.to(self.device), y.to(self.device)
 
+    def train(self) -> None:
+        """Main training loop"""
+        # Setup
+        train_data, val_data, vocab_size = self.setup_data()
+        model = GPTLanguageModel(vocab_size).to(self.device)
 
-# Initialize model and optimizer
-model = GPTLanguageModel(processor.vocab_size).to(device)
-print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
+        optimizer = torch.optim.AdamW(
+            model.parameters(), lr=self.config.learning_rate)
+        logger.info(f'Model parameters: {sum(p.numel()
+                    for p in model.parameters())/1e6:.2f}M')
 
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+        # Training loop
+        for iter in range(self.config.max_iters):
+            # Training step
+            model.train()
+            xb, yb = self.get_batch('train', train_data, val_data)
+            logits, loss = model(xb, yb)
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            optimizer.step()
 
-# Training loop
-"""
-The training loop consists of the following steps:
-1. Get a batch of training data
-2. Compute model predictions and loss
-3. Compute gradients and update model parameters
-4. Periodically evaluate the model on the validation set
+            # Evaluation
+            if ((iter + 1) % self.config.eval_interval == 0 or iter == 0):
+                val_loss = self.evaluate(model, train_data, val_data)
+                logger.info(f'Step {iter}: train loss {
+                            loss.item():.4f}, val loss {val_loss:.4f}')
+                self.save_checkpoint(model, val_loss)
 
-The model is trained for a fixed number of iterations, and the loss is printed
-every eval_interval iterations.
-"""
-for iter in range(max_iters):
-    if iter % eval_interval == 0:
+    def evaluate(self, model: GPTLanguageModel, train_data: torch.Tensor,
+                 val_data: torch.Tensor) -> float:
+        """Evaluate model on validation set"""
         model.eval()
         with torch.no_grad():
-            train_x, train_y = [t.to(device) for t in get_batch('train')]
-            val_x, val_y = [t.to(device) for t in get_batch('val')]
-            train_loss = model(train_x, train_y)[1].item()
-            val_loss = model(val_x, val_y)[1].item()
-        print(f"step {iter}: train loss {train_loss:.4f}, "
-              f"val loss {val_loss:.4f}")
-        model.train()
+            eval_x, eval_y = self.get_batch('val', train_data, val_data)
+            _, val_loss = model(eval_x, eval_y)
+        return val_loss.item()
 
-    xb, yb = get_batch('train')
-    xb, yb = xb.to(device), yb.to(device)
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
+    def save_checkpoint(self, model: GPTLanguageModel, val_loss: float) -> None:
+        """Save model if validation loss improves"""
+        if val_loss < self.best_val_loss:
+            self.best_val_loss = val_loss
+            MODEL_PATH.parent.mkdir(exist_ok=True)
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'vocab_size': self.processor.vocab_size,
+                'stoi': self.processor.stoi,
+                'itos': self.processor.itos
+            }, MODEL_PATH)
+            logger.info(f'Saved checkpoint to {MODEL_PATH}')
 
-torch.save({
-    'model_state_dict': model.state_dict(),
-    'vocab_size': processor.vocab_size,
-    'stoi': processor.stoi,
-    'itos': processor.itos
-}, 'model_checkpoint.pth')
+
+def main():
+    config = TrainConfig()
+    processor = TextProcessor(DATA_PATH)
+    trainer = Trainer(config, processor=processor)
+    trainer.train()
+
+
+if __name__ == '__main__':
+    main()

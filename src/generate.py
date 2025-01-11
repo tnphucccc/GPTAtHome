@@ -39,7 +39,7 @@ def generate_text(model, checkpoint, input_text="", max_tokens=500):
 
 if __name__ == "__main__":
     try:
-        model, checkpoint = load_model('model_checkpoint.pth')
+        model, checkpoint = load_model('checkpoints/model.pth')
 
         while True:
             user_input = input(
