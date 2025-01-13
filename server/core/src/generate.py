@@ -18,7 +18,11 @@ class RuntimeModel:
 
     def load_model(self, checkpoint_path: str):
         try:
-            checkpoint = torch.load(checkpoint_path, weights_only=True)
+            if torch.cuda.is_available():
+                checkpoint = torch.load(checkpoint_path, weights_only=True)
+            else:
+                checkpoint = torch.load(checkpoint_path, weights_only=True, map_location="cpu")
+            
 
             model = GPTLanguageModel(checkpoint["vocab_size"])
             model.load_state_dict(checkpoint["model_state_dict"])

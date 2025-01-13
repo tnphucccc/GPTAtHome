@@ -16,13 +16,11 @@ services:
     container_name: gpt_server
     build:
       context: ./server
-      dockerfile: Dockerfile
+      dockerfile: prod.Dockerfile
       args:
         USERNAME: "vscode"
         BUILDKIT_INLINE_CACHE: "0"
         CLANG_VERSION: ""
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
-    volumes:
-      - .:/workspaces:cached
     command: /bin/bash -c "/workspaces/server/install-dev-tools.sh && fastapi run"

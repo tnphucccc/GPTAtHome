@@ -33,6 +33,10 @@ RUN if [ -n "$CUDA_VERSION" ]; then \
        conda install -y cuda -c "nvidia/label/cuda-${CUDA_VERSION}"; \
     fi
 
+WORKDIR /workspaces/server
+COPY . .
+RUN chmod +x /workspaces/server/install-dev-tools.sh
+CMD ["fastapi", "run"]
 
 # COPY install-dev-tools.sh ./install-dev-tools.sh
 # RUN chmod +x /workspaces/server/install-dev-tools.sh
