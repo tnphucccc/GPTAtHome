@@ -1,0 +1,9 @@
+POST /generate HTTP/1.1
+Host: server:8000
+Content-Type: application/json
+Content-Length: <calculated_length>
+
+{
+  "prompt": "Once upon a time",
+  "max_tokens": 1000
+}
