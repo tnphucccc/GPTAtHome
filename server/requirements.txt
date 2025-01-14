@@ -4,3 +4,5 @@ pandas
 torch
 torchvision
 torchaudio
+aiohttp
+fastapi[standard]==0.115.6

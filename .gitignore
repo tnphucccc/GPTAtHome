@@ -80,3 +80,5 @@ __MACOSX/
 *.pth
 
 upload_model.py
+
+**/.env

@@ -1,0 +1,55 @@
+{
+    "name": "Python Server",
+    "dockerComposeFile": ["../../dev.compose.yml"],
+    "service": "server",
+    // "build": {
+    //     "context": "../..",
+    //     "dockerfile": "./Dockerfile",
+    //     "args": {
+    //       "USERNAME": "vscode",
+    //       "BUILDKIT_INLINE_CACHE": "0",
+    //       "CUDA_VERSION": "11.8.0",
+    //       "CLANG_VERSION": ""
+    //     }
+    //   },
+    //   "runArgs": ["--gpus", "all"],
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    // "postCreateCommand": "./install-dev-tools.sh",
+    "workspaceFolder": "/workspaces/server/",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "njpwerner.autodocstring",
+                "charliermarsh.ruff",
+                "almenon.arepl",
+                "aaron-bond.better-comments",
+                "streetsidesoftware.code-spell-checker"
+            ],
+            "settings": {
+                "[python]": {
+                    "diffEditor.ignoreTrimWhitespace": false,
+                    "editor.defaultColorDecorators": "auto",
+                    "editor.formatOnType": true,
+                    "editor.wordBasedSuggestions": "off",
+                    "editor.formatOnSave": true,
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll": "explicit",
+                        "source.organizeImports": "explicit"
+                    }
+                },
+                "ruff.nativeServer": "on",
+                "ruff.trace.server": "messages"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/rust:1": {}
+    },
+    "hostRequirements": {
+        "gpu": "optional"
+    }
+}

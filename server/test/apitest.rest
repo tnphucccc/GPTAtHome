@@ -1,0 +1,8 @@
+POST http://localhost:8000/generate
+accept: application/json
+Content-Type: application/json
+
+{
+  "prompt": "Write a story about iron man eats bananas",
+  "max_tokens": 500
+}

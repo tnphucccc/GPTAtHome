@@ -1,0 +1,43 @@
+{
+	"name": "NodeJS App",
+	"dockerComposeFile": ["../../dev.compose.yml"],
+	"service": "dev_app",
+	"workspaceFolder": "/workspaces/app",
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "",
+	
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"formulahendry.auto-close-tag",
+				"formulahendry.auto-rename-tag",
+				"oderwat.indent-rainbow",
+				"bradlc.vscode-tailwindcss",
+				"ms-azuretools.vscode-docker",
+				"formulahendry.docker-explorer",
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"usernamehw.errorlens",
+                "bierner.docs-view",
+				"aaron-bond.better-comments",
+				"alefragnani.bookmarks",
+				"streetsidesoftware.code-spell-checker",
+				"christian-kohler.path-intellisense"
+			],
+			"settings": {
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "[rust]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+				"cSpell.words": [
+        			"Konva",
+        			"VITE"
+    			]
+            }
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

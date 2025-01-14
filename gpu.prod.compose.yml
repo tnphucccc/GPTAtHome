@@ -1,0 +1,37 @@
+services:
+  app:
+    container_name: gpt_app
+    image: oven/bun:alpine
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    environment:
+      SERVER_URL: "http://server:${SERVER_PORT}"
+    volumes:
+      - .:/workspaces:cached
+    command: sleep infinity
+
+  server:
+    container_name: gpt_server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      args:
+        USERNAME: "vscode"
+        BUILDKIT_INLINE_CACHE: "0"
+        CUDA_VERSION: "11.8.0"
+        CLANG_VERSION: ""
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    runtime: nvidia
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    volumes:
+      - .:/workspaces:cached
+    command: /bin/bash -c "/workspaces/server/install-dev-tools.sh && sleep infinity"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

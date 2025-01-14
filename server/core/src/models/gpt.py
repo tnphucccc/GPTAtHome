@@ -15,7 +15,7 @@ class Head(nn.Module):
     A single self-attention head that performs scaled dot-product attention.
 
     The attention mechanism allows the model to weigh the importance of different
-    positions in the input sequence when computing the representation for the 
+    positions in the input sequence when computing the representation for the
     current position.
     """
 
@@ -30,8 +30,7 @@ class Head(nn.Module):
         self.key = nn.Linear(n_embedding, head_size, bias=False)
         self.query = nn.Linear(n_embedding, head_size, bias=False)
         self.value = nn.Linear(n_embedding, head_size, bias=False)
-        self.register_buffer('tril', torch.tril(
-            torch.ones(block_size, block_size)))
+        self.register_buffer("tril", torch.tril(torch.ones(block_size, block_size)))
 
         self.dropout = nn.Dropout(dropout)
 
@@ -48,7 +47,7 @@ class Head(nn.Module):
 
         # Compute attention scores
         attn = query @ key.transpose(-2, -1) * key.shape[-1] ** -0.5
-        attn = attn.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+        attn = attn.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
         attn = F.softmax(attn, dim=-1)
         attn = self.dropout(attn)
 
@@ -109,7 +108,7 @@ class FeedFoward(nn.Module):
             nn.Linear(n_embedding, 4 * n_embedding),
             nn.ReLU(),
             nn.Linear(4 * n_embedding, n_embedding),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout),
         )
 
     def forward(self, x):
@@ -159,7 +158,7 @@ class GPTLanguageModel(nn.Module):
     """
     GPT language model with a transformer decoder.
 
-    The model uses a transformer decoder to autoregressively generate new tokens
+    The model uses a transformer decoder to autoregressive generate new tokens
     based on an input sequence of tokens.
     """
 
@@ -174,7 +173,8 @@ class GPTLanguageModel(nn.Module):
         self.token_embedding_table = nn.Embedding(vocab_size, n_embedding)
         self.position_embedding_table = nn.Embedding(block_size, n_embedding)
         self.blocks = nn.Sequential(
-            *[Block(n_embedding, n_head=n_head) for _ in range(n_layer)])
+            *[Block(n_embedding, n_head=n_head) for _ in range(n_layer)]
+        )
         self.ln_f = nn.LayerNorm(n_embedding)
         self.fc = nn.Linear(n_embedding, vocab_size)
 
@@ -227,8 +227,8 @@ class GPTLanguageModel(nn.Module):
             loss = None
         else:
             B, T, C = logits.shape
-            logits = logits.view(B*T, C)
-            targets = targets.view(B*T)
+            logits = logits.view(B * T, C)
+            targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
 
         return logits, loss
